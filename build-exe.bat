@@ -1,25 +1,42 @@
 @echo off
 setlocal
-set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
-if not exist "%CSC%" set CSC=%WINDIR%\Microsoft.NET\Framework\v4.0.30319\csc.exe
+
+REM DesktopTaskView build script
+REM Uses the .NET Framework 4.x C# compiler shipped with Windows.
+REM No external SDK / NuGet / MSBuild required.
+
+set "CSC=C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 if not exist "%CSC%" (
-  echo C# compiler was not found.
-  pause
+  echo [error] csc.exe not found at:
+  echo   %CSC%
+  echo This build needs the .NET Framework 4.x runtime, which ships with Windows 10/11.
   exit /b 1
 )
 
-if exist "%~dp0DesktopTaskView.exe" del "%~dp0DesktopTaskView.exe"
-"%CSC%" /nologo /target:winexe /optimize+ /platform:x64 /out:"%~dp0DesktopTaskView.exe" /reference:System.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll "%~dp0DesktopTaskView.cs"
+cd /d "%~dp0"
+
+if not exist DesktopTaskView.cs (
+  echo [error] DesktopTaskView.cs not found in %CD%
+  exit /b 1
+)
+
+echo [build] Compiling DesktopTaskView.exe ...
+"%CSC%" ^
+  /target:winexe ^
+  /platform:anycpu ^
+  /optimize+ ^
+  /langversion:5 ^
+  /reference:System.dll ^
+  /reference:System.Core.dll ^
+  /reference:System.Drawing.dll ^
+  /reference:System.Windows.Forms.dll ^
+  /out:DesktopTaskView.exe ^
+  DesktopTaskView.cs
+
 if errorlevel 1 (
-  echo Build failed.
-  pause
+  echo [error] Compilation failed.
   exit /b 1
 )
 
-if exist "%~dp0DesktopTaskView.exe" (
-  echo Build complete:
-  echo %~dp0DesktopTaskView.exe
-) else (
-  echo Build failed.
-)
-pause
+echo [done] DesktopTaskView.exe
+endlocal

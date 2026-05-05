@@ -1,20 +1,15 @@
-$exePath = Join-Path $PSScriptRoot "DesktopTaskView.exe"
-$startupFolder = [Environment]::GetFolderPath("Startup")
-$shortcutPath = Join-Path $startupFolder "Desktop Task View.lnk"
+# Enable DesktopTaskView auto-start by writing to HKCU\...\Run
+# Equivalent to ticking "Start with Windows" in the Settings UI.
 
-if (!(Test-Path $exePath)) {
-    Write-Host "DesktopTaskView.exe was not found. Please build it first."
-    Pause
-    exit 1
+$ErrorActionPreference = 'Stop'
+
+$exe = Join-Path $PSScriptRoot 'DesktopTaskView.exe'
+if (-not (Test-Path $exe)) {
+    Write-Error "DesktopTaskView.exe not found next to this script: $exe"
 }
 
-$shell = New-Object -ComObject WScript.Shell
-$shortcut = $shell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = $exePath
-$shortcut.WorkingDirectory = $PSScriptRoot
-$shortcut.Description = "Single-click desktop to show/restore windows; double-click desktop to open Task View"
-$shortcut.Save()
-
-Write-Host "Startup shortcut created:"
-Write-Host $shortcutPath
-Pause
+$run = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+if (-not (Test-Path $run)) { New-Item -Path $run -Force | Out-Null }
+Set-ItemProperty -Path $run -Name 'DesktopTaskView' -Value ('"{0}"' -f $exe)
+Write-Host "Enabled. DesktopTaskView will start with Windows for the current user."
+Write-Host "  Path: $exe"

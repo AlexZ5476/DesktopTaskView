@@ -1,7 +1,20 @@
+# Build outputs
+*.pdb
+*.suo
 bin/
 obj/
+release/*.zip
+
+# IDE
+.vs/
+.vscode/
 *.user
-*.suo
-*.log
-release/
-*.zip
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local notes
+diary/
+useless/
+.claude/
